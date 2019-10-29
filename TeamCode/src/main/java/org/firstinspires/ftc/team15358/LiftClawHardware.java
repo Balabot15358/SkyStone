@@ -18,6 +18,9 @@ public class LiftClawHardware
 
     public DistanceSensor lift_check;
 
+    public Servo    left_grabber = null;
+    public Servo    right_grabber = null;
+
 
     public static final double MID_SERVO       =  0.3 ;
 
