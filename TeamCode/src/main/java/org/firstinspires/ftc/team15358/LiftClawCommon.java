@@ -100,8 +100,8 @@ public class LiftClawCommon {
     public void executeTeleop(){
 
         if (Math.abs(curOpMode.gamepad2.left_stick_y)>0) {
-            if (robot.lift_check.getDistance(DistanceUnit.INCH) >= 0) &&
-            (curOpMode.gamepad2.left_stick_y > 0) {  // test for move down request
+            if ((robot.lift_check.getDistance(DistanceUnit.INCH) >= 0) &&
+            (curOpMode.gamepad2.left_stick_y > 0)) {  // test for move down request
             }
             else
             {  // moving up is always ok.
@@ -221,6 +221,7 @@ public class LiftClawCommon {
      *          floor).
      *      2.  Engage the claw to grasp the stone.
      *      3.  Move the lift up slightly so that the stone will clear the floor.
+     *
      */
     public void pickUpStone()
     {
@@ -355,8 +356,8 @@ public class LiftClawCommon {
             else
             {  // moving down, don't pass zero!
                 int tempTarget = Math.max(currentPosition - 5, 0);
-                while (tempTarget > encoderValue) &&
-                        (robot.lift_check.getDistance(DistanceUnit.INCH)>= 0){
+                while ((tempTarget > encoderValue) &&
+                        (robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)){
                     while (curOpMode.opModeIsActive() &&
                             (runtime.seconds() < timeoutS) &&
                             robot.lift.isBusy()) {
