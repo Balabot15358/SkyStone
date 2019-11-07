@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
+import com.qualcomm.robotcore.hardware.DcMotor;
 /**
  *      LiftClawCommon  This class contains methods for operating the
  *
@@ -100,24 +100,40 @@ public class LiftClawCommon {
     public void executeTeleop(){
 
         if (Math.abs(curOpMode.gamepad2.left_stick_y)>0) {
-            if ((robot.lift_check.getDistance(DistanceUnit.INCH) >= 0) &&
-            (curOpMode.gamepad2.left_stick_y > 0)) {  // test for move down request
+            if ((robot.lift.getCurrentPosition() >70) &&
+                    (curOpMode.gamepad2.left_stick_y > 0) ){  // test for move down request
+
+                if(robot.lift.getCurrentPosition()<400)
+                {
+                    robot.lift.setPower(-.6);
+
+                }
+                else
+                {
+                    robot.lift.setPower(-curOpMode.gamepad2.left_stick_y);
+                }
             }
-            else
+            else if (curOpMode.gamepad2.left_stick_y < 0)
             {  // moving up is always ok.
                 robot.lift.setPower(-curOpMode.gamepad2.left_stick_y);
             }
+            else
+            {
+                robot.lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                robot.lift.setPower(0);
+            }
+
         }
         else
         {
             robot.lift.setPower(0);
         }
 
-        if(curOpMode.gamepad2.left_bumper && claw_servoValue>0)
+        if(curOpMode.gamepad2.left_bumper )//&& claw_servoValue>0)
         {
             openClaw();
         }
-        else if(curOpMode.gamepad2.right_bumper && claw_servoValue!=.6)
+        else if(curOpMode.gamepad2.right_bumper )//&& claw_servoValue!=.6)
         {
             closeClaw();
         }
@@ -145,14 +161,32 @@ public class LiftClawCommon {
             lowerOneBlock();
         }
 
-        if(curOpMode.gamepad2.arrowDown)
+        if(curOpMode.gamepad2.dpad_down)
         {
-            engageGrabbers();
+            if (robot.lift.getCurrentPosition() >70 ){  // test for move down request
+
+                if(robot.lift.getCurrentPosition()<400)
+                {
+                    robot.lift.setPower(-.3);
+
+                }
+                else
+                {
+                    robot.lift.setPower(-curOpMode.gamepad2.left_stick_y);
+                }
+            }
+            else
+            {
+                robot.lift.setPower(0);
+            }
+
         }
 
-        if(curOpMode.gamepad2.arrowUp)
+        if(curOpMode.gamepad2.dpad_up)
         {
-            disengageGrabbers();
+
+            robot.lift.setPower(.3);
+
         }
 
         curOpMode.telemetry.addLine().addData("encoder1:", robot.lift.getCurrentPosition());
@@ -171,8 +205,8 @@ public class LiftClawCommon {
      *
      */
     public void engageGrabbers(){
-        robot.left_grabber.setPosition(0.8);
-        robot.right_grabber.setPosition(0.8);
+        robot.left_grabber.setPosition(0);
+        robot.right_grabber.setPosition(1);
         curOpMode.sleep(50);
     }
 
@@ -184,7 +218,7 @@ public class LiftClawCommon {
      *
      */
     public void disengageGrabbers(){
-        robot.left_grabber.setPosition(0);
+        robot.left_grabber.setPosition(1);
         robot.right_grabber.setPosition(0);
         curOpMode.sleep(50);
     }
@@ -197,7 +231,7 @@ public class LiftClawCommon {
      *
      */
     public void closeClaw(){
-        robot.claw.setPosition(0.8);
+        robot.claw.setPosition(0.4);
         curOpMode.sleep(50);
     }
 
@@ -208,7 +242,7 @@ public class LiftClawCommon {
      *    Deactivate the claw servo so that a stone may be released.
      *
      */
-   public void openClaw(){
+    public void openClaw(){
         robot.claw.setPosition(0);
         curOpMode.sleep(50);
     }
@@ -221,7 +255,6 @@ public class LiftClawCommon {
      *          floor).
      *      2.  Engage the claw to grasp the stone.
      *      3.  Move the lift up slightly so that the stone will clear the floor.
-     *
      */
     public void pickUpStone()
     {
@@ -229,6 +262,8 @@ public class LiftClawCommon {
         lift_position = 0;  //  move from wherever to 0
         encoderDrive(DEFAULT_LIFT_SPEED,lift_position,15);
         closeClaw();
+        curOpMode.sleep(200);
+
         lift_position = 200;  //  0.5" clearance under the stone
         encoderDrive(1,lift_position,15);
     }
@@ -288,7 +323,7 @@ public class LiftClawCommon {
     public void depositStone()
     {
         //  move the lift down to position the claw, disengage the claw, move up
-        lift_position -= 132;  // down 0.75"
+        lift_position = 132;  // down 0.75"
         encoderDrive(DEFAULT_LIFT_SPEED,lift_position,15);
         openClaw();
     }
@@ -320,7 +355,7 @@ public class LiftClawCommon {
 
         //(robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)
 
-            // Ensure that the opmode is still active
+        // Ensure that the opmode is still active
         if (curOpMode.opModeIsActive()) {
 
             robot.lift.setTargetPosition(encoderValue);
@@ -356,8 +391,9 @@ public class LiftClawCommon {
             else
             {  // moving down, don't pass zero!
                 int tempTarget = Math.max(currentPosition - 5, 0);
-                while ((tempTarget > encoderValue) &&
-                        (robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)){
+                while ((tempTarget > encoderValue)
+                    //&& (robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)
+                ){
                     while (curOpMode.opModeIsActive() &&
                             (runtime.seconds() < timeoutS) &&
                             robot.lift.isBusy()) {
