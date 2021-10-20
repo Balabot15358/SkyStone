@@ -34,8 +34,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorMRRangeSensor;
+
 /**
- * 15358 HT update to team configuration of Hardware, 5 motors, 2 servos.
+ * 15358 HT update to team configuration of Hardware, 5 motors, 4 servos.
  * This is NOT an opmode.
  *
  * This class can be used to define all the specific hardware for a single robot.
@@ -45,11 +47,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * This hardware class assumes the following device names have been configured on the robot:
  * Note:  All names are lower case and some have single spaces between words.
  *
- * Motor channel:  Left  drive motor:        "left_drive"
- * Motor channel:  Right drive motor:        "right_drive"
- * Motor channel:  Manipulator drive motor:  "left_arm"
- * Servo channel:  Servo to open left claw:  "left_hand"
- * Servo channel:  Servo to open right claw: "right_hand"
+ * Motor channel:  Left front drive motor:       "left_front_drive"
+ * Motor channel:  Right front drive motor:      "right_front_drive"
+ * Motor channel:  Left rear drive motor:        "left_rear_drive"
+ * Motor channel:  Right rear drive motor:       "right_rear_drive"
+ * Motor channel:  Manipulator drive motor:      "lift"
+ * Servo channel:  Servo to close claw:          "claw"
+ * Servo channel:  Servo to close right grabber: "right_grabber"
+ * Servo channel:  Servo to close left grabber:  "left_grabber"
  */
 public class HardwarePushbotHT_20191012
 {
@@ -62,6 +67,8 @@ public class HardwarePushbotHT_20191012
     public DcMotor  lift = null; // new, now lift pulley system Drive Motor
     public Servo    claw    = null; // was leftClaw, now claw servo
     public Servo    capstone   = null; // was rightClaw, now capstone servo
+    public Servo    right_grabber   = null; // was rightClaw, now capstone servo
+    public Servo    left_grabber   = null; // was rightClaw, now capstone servo
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -82,11 +89,11 @@ public class HardwarePushbotHT_20191012
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        lfDrive  = hwMap.get(DcMotor.class, "left_front_drive");
+        lfDrive = hwMap.get(DcMotor.class, "left_front_drive");
         rfDrive = hwMap.get(DcMotor.class, "right_front_drive");
-        lrDrive  = hwMap.get(DcMotor.class, "left_rear_drive");
+        lrDrive = hwMap.get(DcMotor.class, "left_rear_drive");
         rrDrive = hwMap.get(DcMotor.class, "right_rear_drive");
-        lift = hwMap.get(DcMotor.class, "lift");
+        lift    = hwMap.get(DcMotor.class, "lift");
 
         //leftArm    = hwMap.get(DcMotor.class, "left_arm"); 15358 HT
 
@@ -119,6 +126,8 @@ public class HardwarePushbotHT_20191012
         // Define and initialize ALL installed servos.
         claw  = hwMap.get(Servo.class, "claw");
         capstone = hwMap.get(Servo.class, "capstone");
+        right_grabber = hwMap.get(Servo.class, "right_grabber");
+        left_grabber = hwMap.get(Servo.class, "left_grabber");
         claw.setPosition(MID_SERVO);
         capstone.setPosition(MID_SERVO);
     }
