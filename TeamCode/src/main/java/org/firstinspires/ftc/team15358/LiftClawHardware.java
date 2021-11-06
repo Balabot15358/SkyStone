@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
@@ -17,7 +18,11 @@ public class LiftClawHardware
 
     public DcMotor  lift  = null;
 
+    public DcMotor  sideLift  = null;
+
     public Servo    claw   = null;
+
+    public Servo sideClaw = null;
 
     public DistanceSensor lift_check;
 
@@ -46,15 +51,15 @@ public class LiftClawHardware
         // Define and Initialize Motors
 
         lift = hwMap.get(DcMotor.class, "lift");
-
+        sideLift = hwMap.get(DcMotor.class, "side_lift");
 
 
         lift.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
-
+        sideLift.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
         lift.setPower(0);
-
+        sideLift.setPower(0);
 
         // Set motor to run with encoder
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -63,6 +68,8 @@ public class LiftClawHardware
 
         // Define and initialize ALL installed servos.
         claw  = hwMap.get(Servo.class, "claw");
+
+        sideClaw  = hwMap.get(Servo.class, "side_claw");
 
         left_grabber  = hwMap.get(Servo.class, "left_clamp");
         right_grabber  = hwMap.get(Servo.class, "right_clamp");

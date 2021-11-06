@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.rev.RevTouchSensor;
@@ -18,6 +19,8 @@ public class ChassisHardware
     public DcMotor  driveLF  = null;
     public DcMotor  driveRF  = null;
 
+    public DistanceSensor leftCheck;
+    public DistanceSensor rightCheck;
 
     public Servo    leftGuide = null;
     public Servo    rightGuide = null;
@@ -89,6 +92,9 @@ public class ChassisHardware
         rightGuide  = hwMap.get(Servo.class, "right_guide");
 
         platformTouch = hwMap.get(RevTouchSensor.class, "platform_touch");
+
+        leftCheck = hwMap.get(DistanceSensor.class, "left_check");
+        rightCheck = hwMap.get(DistanceSensor.class, "right_check");
 
     }
 
