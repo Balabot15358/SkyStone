@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import java.util.HashMap;
+import java.util.Map;
 /**
  *      LiftClawCommon  This class contains methods for operating the
  *
@@ -76,13 +78,21 @@ public class LiftClawCommon {
     private int block_count;
     private int lift_position;
     private static final double DEFAULT_LIFT_SPEED = 0.5;
+
+    private static final double FAST_LIFT_SPEED = .8;
     private static final int ONE_INCH = 180;
-    private static final int STONE_HEIGHT = 4 * ONE_INCH;
+    private static final int STONE_HEIGHT = (int) (4.25 * ONE_INCH);
     private static final int FOUNDATION_HEIGHT = 3 * ONE_INCH;
 
     private LinearOpMode curOpMode=null;
 
     private ElapsedTime     runtime = new ElapsedTime();
+
+   Map<Integer,Integer> LIFT_POSITIONS = new HashMap<>();
+
+
+   public ChassisCommon chassis;
+   public AutoCommon auto;
 
     public LiftClawCommon(LinearOpMode owningOpMode){
 
@@ -92,14 +102,29 @@ public class LiftClawCommon {
         robot.lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        holdTension();
+
         block_count = 0;
         lift_position = 0;
+
+
+        LIFT_POSITIONS.put(0,430);
+        LIFT_POSITIONS.put(1,1244);
+        LIFT_POSITIONS.put(2,1929);
+        LIFT_POSITIONS.put(3,2610);
+        LIFT_POSITIONS.put(4,3380);
+        LIFT_POSITIONS.put(5,4100);
+        LIFT_POSITIONS.put(6,4800);
+        LIFT_POSITIONS.put(7,4800);
+        LIFT_POSITIONS.put(8,4800);
+        LIFT_POSITIONS.put(9,4800);
+
 
     }
 
     public void executeTeleop(){
 
-        if (Math.abs(curOpMode.gamepad2.left_stick_y)>0) {
+        /**if (Math.abs(curOpMode.gamepad2.left_stick_y)>0) {
             if ((robot.lift.getCurrentPosition() >70) &&
                     (curOpMode.gamepad2.left_stick_y > 0) ){  // test for move down request
 
@@ -123,11 +148,11 @@ public class LiftClawCommon {
                 robot.lift.setPower(0);
             }
 
-        }
-        else
-        {
-            robot.lift.setPower(0);
-        }
+        }**/
+        //else
+        //{
+        //    robot.lift.setPower(0);
+        //}
 
         if(curOpMode.gamepad2.left_bumper )//&& claw_servoValue>0)
         {
@@ -138,14 +163,6 @@ public class LiftClawCommon {
             closeClaw();
         }
 
-        if(curOpMode.gamepad2.left_trigger > 0){
-            pickUpStone();
-        }
-
-        if(curOpMode.gamepad2.right_trigger > 0){
-            depositStone();
-        }
-
         if(curOpMode.gamepad2.b)
         {
             returnToBottom();
@@ -153,31 +170,29 @@ public class LiftClawCommon {
 
         if(curOpMode.gamepad2.y)
         {
-            liftToDeposit(0);
+            raiseLevel();
         }
 
-        if(curOpMode.gamepad2.x)
+        if(curOpMode.gamepad2.a)
         {
-            lowerOneBlock();
+            lowerToDrop();
         }
 
         if(curOpMode.gamepad2.dpad_down)
         {
+
+
             if (robot.lift.getCurrentPosition() >70 ){  // test for move down request
 
-                if(robot.lift.getCurrentPosition()<400)
-                {
-                    robot.lift.setPower(-.3);
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                }
-                else
-                {
-                    robot.lift.setPower(-curOpMode.gamepad2.left_stick_y);
-                }
-            }
-            else
-            {
-                robot.lift.setPower(0);
+                robot.lift.setPower(-.3);
+
+                robot.lift.setTargetPosition(robot.lift.getCurrentPosition());
+
+                // Turn On RUN_TO_POSITION
+                robot.lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
             }
 
         }
@@ -296,9 +311,43 @@ public class LiftClawCommon {
         else
         {
             lift_position += STONE_HEIGHT;  //  up 4" more
-            encoderDrive(DEFAULT_LIFT_SPEED,lift_position,15);
+            encoderDriveHoldPosition(DEFAULT_LIFT_SPEED,lift_position,15);
             block_count += 1;
         }
+    }
+
+    public void holdTension()
+    {
+
+     //   robot.lift.setPower(.005);
+    }
+
+    public void clearFloor() { //  move arm up to deposit stone
+        lift_position =100;
+
+        encoderDriveHoldPosition(FAST_LIFT_SPEED,lift_position,2);
+    }
+
+    public void raiseLevel() { //  move arm up to deposit stone
+            lift_position =LIFT_POSITIONS.get(block_count);
+
+            encoderDriveHoldPosition(FAST_LIFT_SPEED,lift_position,15);
+            block_count += 1;
+
+    }
+
+    public void lowerToDrop(){
+        lift_position -= ((int)(.2*ONE_INCH));  // down .25"
+
+        if(lift_position<=0)
+        {
+
+            lift_position=0;
+
+        }
+
+        encoderDriveHoldPosition(DEFAULT_LIFT_SPEED,lift_position,15);
+
     }
 
     /**
@@ -336,8 +385,17 @@ public class LiftClawCommon {
      */
     public void returnToBottom(){
         lift_position = 0;
-        encoderDrive(DEFAULT_LIFT_SPEED,lift_position,15);
+        encoderDrive(FAST_LIFT_SPEED,lift_position,15);
         block_count = 0;
+    }
+
+
+    public void checkDriverControls()
+    {
+        if(chassis !=null)
+        {
+            chassis.executeTeleop();
+        }
     }
 
     /**
@@ -381,7 +439,7 @@ public class LiftClawCommon {
                         robot.lift.isBusy()) {
 
                     // Display it for the driver.
-
+                    checkDriverControls();
                     curOpMode.telemetry.addData("Path2", "Running at %7d",
                             robot.lift.getCurrentPosition()
                     );
@@ -390,23 +448,20 @@ public class LiftClawCommon {
             }
             else
             {  // moving down, don't pass zero!
-                int tempTarget = Math.max(currentPosition - 5, 0);
-                while ((tempTarget > encoderValue)
-                    //&& (robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)
-                ){
+
                     while (curOpMode.opModeIsActive() &&
                             (runtime.seconds() < timeoutS) &&
                             robot.lift.isBusy()) {
 
                         // Display it for the driver.
-
+                        checkDriverControls();
                         curOpMode.telemetry.addData("Path2", "Running at %7d",
                                 robot.lift.getCurrentPosition()
                         );
                         curOpMode.telemetry.update();
                     }
-                    tempTarget = Math.max(tempTarget -5, 0);
-                }
+
+
             }
             // Stop all motion;
             robot.lift.setPower(0);
@@ -415,6 +470,65 @@ public class LiftClawCommon {
             robot.lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         }
+
+    }
+
+
+    /**
+     *   encoderDrive()
+     *
+     *   Drive the lift to the level requested by encoderValue.
+     *
+     * @param speed
+     * @param encoderValue
+     * @param timeoutS
+     */
+    public void encoderDriveHoldPosition(double speed,
+                             int encoderValue,
+                             double timeoutS) {
+
+        //(robot.lift_check.getDistance(DistanceUnit.INCH)>= 0)
+
+        // Ensure that the opmode is still active
+        if (curOpMode.opModeIsActive()) {
+
+            robot.lift.setTargetPosition(encoderValue);
+            int currentPosition = robot.lift.getCurrentPosition();
+
+            // Turn On RUN_TO_POSITION
+            robot.lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            robot.lift.setPower(speed);
+
+            if (encoderValue > currentPosition) {  // if going up, no need to check
+                while (curOpMode.opModeIsActive() &&
+                        (runtime.seconds() < timeoutS) &&
+                        robot.lift.isBusy()) {
+
+                    // Display it for the driver.
+                    robot.lift.setPower(speed);
+                    curOpMode.telemetry.addData("Path2", "Running at %7d",
+                            robot.lift.getCurrentPosition()
+                    );
+                    curOpMode.telemetry.update();
+
+                    checkDriverControls();
+                }
+            }
+
+            if(lift_position==0) {
+                robot.lift.setPower(0);
+
+                // Turn off RUN_TO_POSITION
+                robot.lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+            //robot.lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+
 
     }
 

@@ -67,8 +67,8 @@ import com.vuforia.CameraDevice;
  */
 
 @Autonomous(name="RED 01 (All Actions)", group="OnBot")
-//
-//@Disabled
+
+@Disabled
 public class _Red01_All extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -129,32 +129,32 @@ public class _Red01_All extends LinearOpMode {
            if (blockLoc.get(1) > 3) {
 
                //Drive to right positioned skystone and close claw, backup and turn towards build zone
-               auto.GetRightOrLeftBlock(TURN_SPEED, false, true);
+               auto.GetRightOrLeftBlock(TURN_SPEED, blue, true);
 
                //Drive to forward into the build zone and turn towards platform
-               auto.DriveToPlatformPosition(TURN_SPEED,false, false, true,true);
+               auto.DriveToPlatformPosition(TURN_SPEED,blue, false, true,true);
 
            //This value indicates the skystone is in the center position
            } else if (blockLoc.get(1) < 3) {
 
                //Drive to center positioned skystone and close claw, backup and turn towards build zone
-               auto.GetCenterBlock(false);
+               auto.GetCenterBlock(TURN_SPEED,blue);
 
                //Drive to forward into the build zone and turn towards platform
-               auto.DriveToPlatformPosition(TURN_SPEED,false, true, false,true);
+               auto.DriveToPlatformPosition(TURN_SPEED,blue, true, false,true);
            }
        //Default value, if not identified as center or right it is assumed to be the left position
        } else {
 
            //Drive to left positioned skystone and close claw, backup and turn towards build zone
-           auto.GetRightOrLeftBlock(TURN_SPEED, false, false);
+           auto.GetRightOrLeftBlock(TURN_SPEED, blue, false);
 
            //Drive to forward into the build zone and turn towards platform
-           auto.DriveToPlatformPosition(TURN_SPEED,false, false, false, true);
+           auto.DriveToPlatformPosition(TURN_SPEED,blue, false, false, true);
        }
 
        //Drive forward and grab platform, backup then turn platform and push into corner
-       auto.GetAndPlacePlatform(DRIVE_SPEED, TURN_SPEED, blue);
+       auto.GetAndPlacePlatform(DRIVE_SPEED, TURN_SPEED, blue,true);
 
    }
 
